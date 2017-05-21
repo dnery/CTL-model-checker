@@ -458,14 +458,21 @@ char *yytext;
 #line 1 "lexical.l"
 #line 2 "lexical.l"
 /* Exchange type: 2. define also comes from tab.h */
-#define YYSTYPE char *
+typedef union LVAL_T {
+
+        size_t value;
+        char *name;
+
+} lval_t;
+
+#define YYSTYPE lval_t
 
 #include "grammar.tab.h"
 
 /* Exchange type: 3. defer resolution to linker */
-extern char *yylval;
-#line 467 "lex.yy.c"
-#line 468 "lex.yy.c"
+extern lval_t yylval;
+#line 474 "lex.yy.c"
+#line 475 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -682,9 +689,9 @@ YY_DECL
 		}
 
 	{
-#line 11 "lexical.l"
+#line 18 "lexical.l"
 
-#line 687 "lex.yy.c"
+#line 694 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -743,102 +750,102 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 12 "lexical.l"
+#line 19 "lexical.l"
 return LOGICAL_OR;      /* Logical expression tokens */
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 13 "lexical.l"
+#line 20 "lexical.l"
 return LOGICAL_NOT;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 14 "lexical.l"
+#line 21 "lexical.l"
 return LOGICAL_AND;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 15 "lexical.l"
+#line 22 "lexical.l"
 return LOGICAL_IMP;
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 16 "lexical.l"
+#line 23 "lexical.l"
 return LOGICAL_IFF;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 18 "lexical.l"
+#line 25 "lexical.l"
 return CTL_AF;          /* CTL command tokens */
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 19 "lexical.l"
+#line 26 "lexical.l"
 return CTL_EF;
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 20 "lexical.l"
+#line 27 "lexical.l"
 return CTL_AG;
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 21 "lexical.l"
+#line 28 "lexical.l"
 return CTL_EG;
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 22 "lexical.l"
+#line 29 "lexical.l"
 return CTL_AX;
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 23 "lexical.l"
+#line 30 "lexical.l"
 return CTL_EX;
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 24 "lexical.l"
+#line 31 "lexical.l"
 return CTL_AU;
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 25 "lexical.l"
+#line 32 "lexical.l"
 return CTL_EU;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 27 "lexical.l"
-{ yylval = yytext;
+#line 34 "lexical.l"
+{ yylval.name = yytext;
                           return IDENTIFIER; }  /* Store identifier name */
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 30 "lexical.l"
+#line 37 "lexical.l"
 return OPAR;
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 31 "lexical.l"
+#line 38 "lexical.l"
 return CPAR;
 	YY_BREAK
 case 17:
 /* rule 17 can match eol */
 YY_RULE_SETUP
-#line 32 "lexical.l"
+#line 39 "lexical.l"
 return EOL;
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 33 "lexical.l"
+#line 40 "lexical.l"
 ;                       /* Ignore any whitespace */
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 34 "lexical.l"
+#line 41 "lexical.l"
 ECHO;
 	YY_BREAK
-#line 841 "lex.yy.c"
+#line 848 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1843,6 +1850,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 34 "lexical.l"
+#line 41 "lexical.l"
 
 

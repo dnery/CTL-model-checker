@@ -67,9 +67,19 @@
 #include <stdio.h>
 
 /* Exchange type: 1. define the exchange type */
-#define YYSTYPE char *
+typedef union LVAL_T {
 
-#line 73 "grammar.tab.c" /* yacc.c:339  */
+        size_t value;
+        char *name;
+
+} lval_t;
+
+#define YYSTYPE lval_t
+
+/* unique numerical id for the processing step */
+size_t unique;
+
+#line 83 "grammar.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -140,7 +150,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 144 "grammar.tab.c" /* yacc.c:358  */
+#line 154 "grammar.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -439,9 +449,9 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    26,    26,    27,    28,    31,    34,    35,    39,    43,
-      47,    53,    54,    58,    62,    66,    70,    74,    78,    82,
-      86,    92,    96
+       0,    36,    36,    37,    38,    44,    47,    48,    52,    56,
+      62,    68,    69,    73,    77,    81,    85,    89,    93,    97,
+     101,   107,   112
 };
 #endif
 
@@ -1231,128 +1241,139 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-        case 7:
-#line 36 "grammar.y" /* yacc.c:1646  */
+        case 4:
+#line 39 "grammar.y" /* yacc.c:1646  */
+    {
+        unique = 0;
+    }
+#line 1250 "grammar.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 7:
+#line 49 "grammar.y" /* yacc.c:1646  */
     {
                 printf("Logical OR.\n");
           }
-#line 1240 "grammar.tab.c" /* yacc.c:1646  */
+#line 1258 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 40 "grammar.y" /* yacc.c:1646  */
+#line 53 "grammar.y" /* yacc.c:1646  */
     {
                 printf("Logical AND.\n");
           }
-#line 1248 "grammar.tab.c" /* yacc.c:1646  */
+#line 1266 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 44 "grammar.y" /* yacc.c:1646  */
+#line 57 "grammar.y" /* yacc.c:1646  */
     {
-                printf("Logical implication.\n");
+                printf("Logical implication between %llu and %llu tagged as %llu.\n",
+                (yyvsp[-2]).value, (yyvsp[0]).value, unique);
+                (yyval).value = unique++;
           }
-#line 1256 "grammar.tab.c" /* yacc.c:1646  */
+#line 1276 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 48 "grammar.y" /* yacc.c:1646  */
+#line 63 "grammar.y" /* yacc.c:1646  */
     {
                 printf("Logical if-only-if.\n");
           }
-#line 1264 "grammar.tab.c" /* yacc.c:1646  */
+#line 1284 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 55 "grammar.y" /* yacc.c:1646  */
+#line 70 "grammar.y" /* yacc.c:1646  */
     {
                printf("Logical NOT.\n");
           }
-#line 1272 "grammar.tab.c" /* yacc.c:1646  */
+#line 1292 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 59 "grammar.y" /* yacc.c:1646  */
+#line 74 "grammar.y" /* yacc.c:1646  */
     {
                printf("CTL all finally.\n");
           }
-#line 1280 "grammar.tab.c" /* yacc.c:1646  */
+#line 1300 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 63 "grammar.y" /* yacc.c:1646  */
+#line 78 "grammar.y" /* yacc.c:1646  */
     {
                printf("CTL exists finally.\n");
           }
-#line 1288 "grammar.tab.c" /* yacc.c:1646  */
+#line 1308 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 67 "grammar.y" /* yacc.c:1646  */
+#line 82 "grammar.y" /* yacc.c:1646  */
     {
                printf("CTL all globally.\n");
           }
-#line 1296 "grammar.tab.c" /* yacc.c:1646  */
+#line 1316 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 71 "grammar.y" /* yacc.c:1646  */
+#line 86 "grammar.y" /* yacc.c:1646  */
     {
                printf("CTL exists globally.\n");
           }
-#line 1304 "grammar.tab.c" /* yacc.c:1646  */
+#line 1324 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 75 "grammar.y" /* yacc.c:1646  */
+#line 90 "grammar.y" /* yacc.c:1646  */
     {
                printf("CTL all next.\n");
           }
-#line 1312 "grammar.tab.c" /* yacc.c:1646  */
+#line 1332 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 79 "grammar.y" /* yacc.c:1646  */
+#line 94 "grammar.y" /* yacc.c:1646  */
     {
                printf("CTL exists next.\n");
           }
-#line 1320 "grammar.tab.c" /* yacc.c:1646  */
+#line 1340 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 83 "grammar.y" /* yacc.c:1646  */
+#line 98 "grammar.y" /* yacc.c:1646  */
     {
                printf("CTL all until.\n");
           }
-#line 1328 "grammar.tab.c" /* yacc.c:1646  */
+#line 1348 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 87 "grammar.y" /* yacc.c:1646  */
+#line 102 "grammar.y" /* yacc.c:1646  */
     {
                printf("CTL exists until.\n");
           }
-#line 1336 "grammar.tab.c" /* yacc.c:1646  */
+#line 1356 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 93 "grammar.y" /* yacc.c:1646  */
+#line 108 "grammar.y" /* yacc.c:1646  */
     {
-                printf("Identifier %s.\n", (yyvsp[0]));
+                printf("Identifier %s tagged as %llu.\n", (yyvsp[0]).name, unique);
+                (yyval).value = unique++;
             }
-#line 1344 "grammar.tab.c" /* yacc.c:1646  */
+#line 1365 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 97 "grammar.y" /* yacc.c:1646  */
+#line 113 "grammar.y" /* yacc.c:1646  */
     {
                 printf("Parenthesized expr.\n");
             }
-#line 1352 "grammar.tab.c" /* yacc.c:1646  */
+#line 1373 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1356 "grammar.tab.c" /* yacc.c:1646  */
+#line 1377 "grammar.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1580,11 +1601,11 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 101 "grammar.y" /* yacc.c:1906  */
+#line 117 "grammar.y" /* yacc.c:1906  */
 
 
 /* Exchange type: 4. exchange variable is finally defined */
-char *yylval;  // global: lexer retrieve
+lval_t yylval;  // global: lexer retrieve
 char *pgname;  // global: program name
 
 int main(int argc, char *argv[])

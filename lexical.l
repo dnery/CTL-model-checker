@@ -1,11 +1,18 @@
 %{
 /* Exchange type: 2. define also comes from tab.h */
-#define YYSTYPE char *
+typedef union LVAL_T {
+
+        size_t value;
+        char *name;
+
+} lval_t;
+
+#define YYSTYPE lval_t
 
 #include "grammar.tab.h"
 
 /* Exchange type: 3. defer resolution to linker */
-extern char *yylval;
+extern lval_t yylval;
 %}
 
 %%
@@ -24,7 +31,7 @@ extern char *yylval;
 "AU"                    return CTL_AU;
 "EU"                    return CTL_EU;
 
-[a-zA-Z][a-zA-Z0-9]*    { yylval = yytext;
+[a-zA-Z][a-zA-Z0-9]*    { yylval.name = yytext;
                           return IDENTIFIER; }  /* Store identifier name */
 
 "("                     return OPAR;

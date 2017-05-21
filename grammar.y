@@ -2,7 +2,17 @@
 #include <stdio.h>
 
 /* Exchange type: 1. define the exchange type */
-#define YYSTYPE char *
+typedef union LVAL_T {
+
+        size_t value;
+        char *name;
+
+} lval_t;
+
+#define YYSTYPE lval_t
+
+/* unique numerical id for the processing step */
+size_t unique;
 %}
 
 /* Precedence increases downwards */
@@ -26,6 +36,9 @@
 list: /* literally nothing */
     | list EOL
     | list expr EOL
+    {
+        unique = 0;
+    }
     ;
 
 expr: logical_expr
@@ -42,7 +55,9 @@ logical_expr: unary_expr
           }
           | logical_expr LOGICAL_IMP unary_expr
           {
-                printf("Logical implication.\n");
+                printf("Logical implication between %llu and %llu tagged as %llu.\n",
+                $1.value, $3.value, unique);
+                $$.value = unique++;
           }
           | logical_expr LOGICAL_IFF unary_expr
           {
@@ -91,7 +106,8 @@ unary_expr: primary_expr
 
 primary_expr: IDENTIFIER
             {
-                printf("Identifier %s.\n", $1);
+                printf("Identifier %s tagged as %llu.\n", $1.name, unique);
+                $$.value = unique++;
             }
             | OPAR expr CPAR
             {
@@ -101,7 +117,7 @@ primary_expr: IDENTIFIER
 %%
 
 /* Exchange type: 4. exchange variable is finally defined */
-char *yylval;  // global: lexer retrieve
+lval_t yylval;  // global: lexer retrieve
 char *pgname;  // global: program name
 
 int main(int argc, char *argv[])
