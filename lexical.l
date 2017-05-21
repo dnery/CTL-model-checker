@@ -29,8 +29,8 @@ extern lval_t yylval;
 "EX"                    return CTL_EX;
 "AU"                    return CTL_AU;
 "EU"                    return CTL_EU;
-[a-zA-Z][a-zA-Z0-9]*    { yylval.name = yytext;
-                          return IDENTIFIER; }  /* Store identifier name */
+[a-zA-Z][a-zA-Z0-9]*  { yylval.name = yytext;
+                        return IDENTIFIER; }  /* Store identifier name */
 ","                     return COMMA;
 "("                     return OPAR;
 ")"                     return CPAR;

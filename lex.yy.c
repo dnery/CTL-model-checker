@@ -820,7 +820,7 @@ case 14:
 YY_RULE_SETUP
 #line 32 "lexical.l"
 { yylval.name = yytext;
-                          return IDENTIFIER; }  /* Store identifier name */
+                        return IDENTIFIER; }  /* Store identifier name */
 	YY_BREAK
 case 15:
 YY_RULE_SETUP

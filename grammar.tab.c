@@ -1679,21 +1679,146 @@ yyreturn:
 #line 154 "grammar.y" /* yacc.c:1906  */
 
 
+
+#include <stdlib.h>
+#include <string.h>
+
+
+/* Node type for graph holds properties as strings */
+typedef struct NODE_T {
+
+        size_t nprops;  // number of props
+        char **props;   // props as strings
+
+} node_t;
+char   *am_graph;  // global: adj-matrix graph (as a vector)
+node_t *am_nodes;  // global: adj-matrix graph nodes
+size_t  am_dims;   // golbal: adj-matrix dimensions
+
+
 /* Exchange type: 4. exchange variable is finally defined */
 lval_t yylval;  // global: lexer retrieve
-char *pgname;  // global: program name
+char  *pgname;  // global: program name
+
 
 int main(int argc, char *argv[])
 {
         pgname = argv[0];
+
+        /*
+         * Read graph
+         */
+        freopen(argv[1], "r", stdin);
+        printf("\nReading graph...\n\n");
+
+        // Read: number of nodes in graph
+        scanf("%llu", &am_dims);
+        am_graph = calloc(am_dims * am_dims, 1);
+        am_nodes = malloc(am_dims * sizeof(*am_nodes));
+
+        // Read: nodes in graph
+        for (size_t inode = 0; inode < am_dims; inode++) {
+
+                // Current node
+                size_t currentnode;
+                scanf("%llu", &currentnode);
+
+                // Following nodes
+                size_t nnextnodes;
+                size_t nodereader;
+
+                // Following props
+                size_t nnextprops;
+                char   propreader[2048];
+
+                // Read: n next props
+                scanf("%llu", &nnextprops);
+                am_nodes[currentnode-1].nprops = nnextprops;
+                am_nodes[currentnode-1].props = malloc(nnextprops *
+                                sizeof(*(am_nodes[currentnode-1].props)));
+
+                // Read: next props
+                for (size_t iprop = 0; iprop < nnextprops; iprop++) {
+                        scanf("%s", propreader);
+                        am_nodes[currentnode-1].props[iprop] =
+                                        malloc(strlen(propreader) + 1);
+                        strcpy(am_nodes[currentnode-1].props[iprop], propreader);
+                }
+
+                // Read: n next nodes
+                scanf("%llu", &nnextnodes);
+
+                // Read: next nodes
+                for (size_t inode = 0; inode < nnextnodes; inode++) {
+                        scanf("%llu", &nodereader);
+                        size_t idx = (currentnode-1)*am_dims+nodereader-1;
+                        am_graph[idx] = 1;
+                }
+        }
+
+        /*
+         * Print graph
+         */
+        printf("Printing: graph adj-matrix\n\n");
+
+        // Print: adj-matrix graph
+        for (size_t inode = 0; inode < am_dims; inode++) {
+                for (size_t inext = 0; inext < am_dims; inext++)
+                        printf("%d ", am_graph[inode*am_dims+inext]);
+                printf("\n");
+        }
+
+        printf("\nPrinting: graph node info\n\n");
+
+        // Print: adj-matrix nodes
+        for (size_t inode = 0; inode < am_dims; inode++) {
+                printf("Node %d:", inode+1);
+
+                printf("\n  Has neighbours: ");
+                for (size_t inext = 0; inext < am_dims; inext++)
+                        if (am_graph[inode*am_dims+inext])
+                                printf("%llu ", inext+1);
+
+                printf("\n  Has properties: ");
+                for (size_t iprop = 0; iprop < am_nodes[inode].nprops; iprop++)
+                        printf("%s ", am_nodes[inode].props[iprop]);
+
+                printf("\n");
+        }
+
+        printf("\nBegin CTL expression parsing...\n\n");
+
         yyparse();
+
+        /*
+         * Free graph
+         */
+        printf("\nParsing successful. Deallocating graph...\n\n");
+
+        // Free: node props
+        for (size_t inode = 0; inode < am_dims; inode++) {
+                for (size_t iprop = 0; iprop < am_nodes[inode].nprops; iprop++)
+                        free(am_nodes[inode].props[iprop]);
+                free(am_nodes[inode].props);
+
+                printf("  Freed node %llu prop array.\n", inode+1);
+        }
+
+        // Free: nodes & graph
+        free(am_nodes);
+        free(am_graph);
+        printf("  Freed node array and adj-matrix.\n\n");
+
+        return 0;
 }
 
+/* Called when syntax error is found */
 int yyerror(char *err)
 {
         fprintf(stderr, "%s: %s\n", pgname, err);
 }
 
+/* Called when parsing reaches EOF */
 int yywrap()
 {
         return 1;
