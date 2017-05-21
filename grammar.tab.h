@@ -45,23 +45,24 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    EOL = 258,
-    LOGICAL_OR = 259,
-    LOGICAL_AND = 260,
-    LOGICAL_IMP = 261,
-    LOGICAL_IFF = 262,
-    LOGICAL_NOT = 263,
-    CTL_AF = 264,
-    CTL_EF = 265,
-    CTL_AG = 266,
-    CTL_EG = 267,
-    CTL_AX = 268,
-    CTL_EX = 269,
-    CTL_AU = 270,
-    CTL_EU = 271,
-    IDENTIFIER = 272,
-    OPAR = 273,
-    CPAR = 274
+    IDENTIFIER = 258,
+    OPAR = 259,
+    CPAR = 260,
+    COMMA = 261,
+    EOL = 262,
+    LOGICAL_OR = 263,
+    LOGICAL_AND = 264,
+    LOGICAL_IMP = 265,
+    LOGICAL_IFF = 266,
+    LOGICAL_NOT = 267,
+    CTL_AF = 268,
+    CTL_EF = 269,
+    CTL_AG = 270,
+    CTL_EG = 271,
+    CTL_AX = 272,
+    CTL_EX = 273,
+    CTL_AU = 274,
+    CTL_EU = 275
   };
 #endif
 

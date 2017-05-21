@@ -114,23 +114,24 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    EOL = 258,
-    LOGICAL_OR = 259,
-    LOGICAL_AND = 260,
-    LOGICAL_IMP = 261,
-    LOGICAL_IFF = 262,
-    LOGICAL_NOT = 263,
-    CTL_AF = 264,
-    CTL_EF = 265,
-    CTL_AG = 266,
-    CTL_EG = 267,
-    CTL_AX = 268,
-    CTL_EX = 269,
-    CTL_AU = 270,
-    CTL_EU = 271,
-    IDENTIFIER = 272,
-    OPAR = 273,
-    CPAR = 274
+    IDENTIFIER = 258,
+    OPAR = 259,
+    CPAR = 260,
+    COMMA = 261,
+    EOL = 262,
+    LOGICAL_OR = 263,
+    LOGICAL_AND = 264,
+    LOGICAL_IMP = 265,
+    LOGICAL_IFF = 266,
+    LOGICAL_NOT = 267,
+    CTL_AF = 268,
+    CTL_EF = 269,
+    CTL_AG = 270,
+    CTL_EG = 271,
+    CTL_AX = 272,
+    CTL_EX = 273,
+    CTL_AU = 274,
+    CTL_EU = 275
   };
 #endif
 
@@ -150,7 +151,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 154 "grammar.tab.c" /* yacc.c:358  */
+#line 155 "grammar.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -392,21 +393,21 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  2
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   44
+#define YYLAST   110
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  20
+#define YYNTOKENS  21
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  6
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  22
+#define YYNRULES  24
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  39
+#define YYNSTATES  51
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   274
+#define YYMAXUTOK   275
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -442,16 +443,16 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16,    17,    18,    19
+      15,    16,    17,    18,    19,    20
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    36,    36,    37,    38,    44,    47,    48,    52,    56,
-      62,    68,    69,    73,    77,    81,    85,    89,    93,    97,
-     101,   107,   112
+       0,    33,    33,    34,    35,    41,    47,    48,    54,    60,
+      66,    74,    75,    81,    87,    93,    99,   105,   111,   117,
+     123,   129,   135,   143,   148
 };
 #endif
 
@@ -460,11 +461,11 @@ static const yytype_uint8 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "EOL", "LOGICAL_OR", "LOGICAL_AND",
-  "LOGICAL_IMP", "LOGICAL_IFF", "LOGICAL_NOT", "CTL_AF", "CTL_EF",
-  "CTL_AG", "CTL_EG", "CTL_AX", "CTL_EX", "CTL_AU", "CTL_EU", "IDENTIFIER",
-  "OPAR", "CPAR", "$accept", "list", "expr", "logical_expr", "unary_expr",
-  "primary_expr", YY_NULLPTR
+  "$end", "error", "$undefined", "IDENTIFIER", "OPAR", "CPAR", "COMMA",
+  "EOL", "LOGICAL_OR", "LOGICAL_AND", "LOGICAL_IMP", "LOGICAL_IFF",
+  "LOGICAL_NOT", "CTL_AF", "CTL_EF", "CTL_AG", "CTL_EG", "CTL_AX",
+  "CTL_EX", "CTL_AU", "CTL_EU", "$accept", "list", "expr", "logical_expr",
+  "unary_expr", "primary_expr", YY_NULLPTR
 };
 #endif
 
@@ -474,14 +475,15 @@ static const char *const yytname[] =
 static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,   267,   268,   269,   270,   271,   272,   273,   274
+     265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
+     275
 };
 # endif
 
-#define YYPACT_NINF -5
+#define YYPACT_NINF -7
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-5)))
+  (!!((Yystate) == (-7)))
 
 #define YYTABLE_NINF -1
 
@@ -492,10 +494,12 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -5,    22,    -5,    -5,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,    -5,     1,    17,    37,    -5,    -5,    -5,
-      -5,    -5,    -5,    -5,    -5,    -5,    -5,    -5,     2,    -5,
-       1,     1,     1,     1,    -5,    -5,    -5,    -5,    -5
+      -7,    36,    -7,    -7,    54,    -7,    54,    54,    54,    54,
+      54,    54,    54,    72,    90,    -6,     5,    -7,    -7,    14,
+      -7,    -7,    -7,    -7,    -7,    -7,    -7,    54,    54,    54,
+      54,    -7,    54,    54,    54,    54,    -7,    -3,    -7,    12,
+      -7,    -7,    -7,    -7,    -7,    54,    54,    15,    16,    -7,
+      -7
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -503,16 +507,18 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       2,     0,     1,     3,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,    21,     0,     0,     5,     6,    11,    12,
-      13,    14,    15,    16,    17,    18,    19,    20,     0,     4,
-       0,     0,     0,     0,    22,     7,     8,     9,    10
+       2,     0,     1,    23,     0,     3,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     5,     6,    11,     0,
+      12,    13,    14,    15,    16,    17,    18,     0,     0,     0,
+       0,     4,     0,     0,     0,     0,    24,     0,    19,     0,
+      21,     7,     8,     9,    10,     0,     0,     0,     0,    20,
+      22
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -5,    -5,     9,    -5,    -4,    -5
+      -7,    -7,    -4,    -7,    -2,    -7
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
@@ -526,46 +532,62 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-      19,    20,    21,    22,    23,    24,    25,    26,    27,     4,
-       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      29,    34,     2,    28,     0,     3,    35,    36,    37,    38,
-       4,     5,     6,     7,     8,     9,    10,    11,    12,    13,
-      14,    30,    31,    32,    33
+      19,    31,    36,    45,    20,    21,    22,    23,    24,    25,
+      26,    28,    30,    32,    33,    34,    35,    36,    46,    36,
+      49,    50,     0,    37,     0,    39,    38,     0,    40,     0,
+      41,    42,    43,    44,     0,     0,     2,     0,     0,     3,
+       4,    47,    48,     5,     0,     0,     0,     0,     6,     7,
+       8,     9,    10,    11,    12,    13,    14,     3,     4,     0,
+       0,     0,     0,     0,     0,     0,     6,     7,     8,     9,
+      10,    11,    12,    13,    14,     3,    27,     0,     0,     0,
+       0,     0,     0,     0,     6,     7,     8,     9,    10,    11,
+      12,    13,    14,     3,    29,     0,     0,     0,     0,     0,
+       0,     0,     6,     7,     8,     9,    10,    11,    12,    13,
+      14
 };
 
 static const yytype_int8 yycheck[] =
 {
-       4,     5,     6,     7,     8,     9,    10,    11,    12,     8,
-       9,    10,    11,    12,    13,    14,    15,    16,    17,    18,
-       3,    19,     0,    14,    -1,     3,    30,    31,    32,    33,
-       8,     9,    10,    11,    12,    13,    14,    15,    16,    17,
-      18,     4,     5,     6,     7
+       4,     7,     5,     6,     6,     7,     8,     9,    10,    11,
+      12,    13,    14,     8,     9,    10,    11,     5,     6,     5,
+       5,     5,    -1,    27,    -1,    29,    28,    -1,    30,    -1,
+      32,    33,    34,    35,    -1,    -1,     0,    -1,    -1,     3,
+       4,    45,    46,     7,    -1,    -1,    -1,    -1,    12,    13,
+      14,    15,    16,    17,    18,    19,    20,     3,     4,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    12,    13,    14,    15,
+      16,    17,    18,    19,    20,     3,     4,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    12,    13,    14,    15,    16,    17,
+      18,    19,    20,     3,     4,    -1,    -1,    -1,    -1,    -1,
+      -1,    -1,    12,    13,    14,    15,    16,    17,    18,    19,
+      20
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,    21,     0,     3,     8,     9,    10,    11,    12,    13,
-      14,    15,    16,    17,    18,    22,    23,    24,    25,    24,
-      24,    24,    24,    24,    24,    24,    24,    24,    22,     3,
-       4,     5,     6,     7,    19,    24,    24,    24,    24
+       0,    22,     0,     3,     4,     7,    12,    13,    14,    15,
+      16,    17,    18,    19,    20,    23,    24,    25,    26,    23,
+      25,    25,    25,    25,    25,    25,    25,     4,    25,     4,
+      25,     7,     8,     9,    10,    11,     5,    23,    25,    23,
+      25,    25,    25,    25,    25,     6,     6,    23,    23,     5,
+       5
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    20,    21,    21,    21,    22,    23,    23,    23,    23,
-      23,    24,    24,    24,    24,    24,    24,    24,    24,    24,
-      24,    25,    25
+       0,    21,    22,    22,    22,    23,    24,    24,    24,    24,
+      24,    25,    25,    25,    25,    25,    25,    25,    25,    25,
+      25,    25,    25,    26,    26
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
        0,     2,     0,     2,     3,     1,     1,     3,     3,     3,
-       3,     1,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     1,     3
+       3,     1,     2,     2,     2,     2,     2,     2,     2,     3,
+       6,     3,     6,     1,     3
 };
 
 
@@ -1242,138 +1264,191 @@ yyreduce:
   switch (yyn)
     {
         case 4:
-#line 39 "grammar.y" /* yacc.c:1646  */
+#line 36 "grammar.y" /* yacc.c:1646  */
     {
         unique = 0;
     }
-#line 1250 "grammar.tab.c" /* yacc.c:1646  */
+#line 1272 "grammar.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 5:
+#line 42 "grammar.y" /* yacc.c:1646  */
+    {
+        (yyval).value = (yyvsp[0]).value;
+    }
+#line 1280 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
 #line 49 "grammar.y" /* yacc.c:1646  */
     {
-                printf("Logical OR.\n");
+                printf("Logical OR between %llu and %llu tagged as %llu.\n",
+                (yyvsp[-2]).value, (yyvsp[0]).value, unique);
+                (yyval).value = unique++;
           }
-#line 1258 "grammar.tab.c" /* yacc.c:1646  */
+#line 1290 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 53 "grammar.y" /* yacc.c:1646  */
+#line 55 "grammar.y" /* yacc.c:1646  */
     {
-                printf("Logical AND.\n");
+                printf("Logical AND between %llu and %llu tagged as %llu.\n",
+                (yyvsp[-2]).value, (yyvsp[0]).value, unique);
+                (yyval).value = unique++;
           }
-#line 1266 "grammar.tab.c" /* yacc.c:1646  */
+#line 1300 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 57 "grammar.y" /* yacc.c:1646  */
+#line 61 "grammar.y" /* yacc.c:1646  */
     {
                 printf("Logical implication between %llu and %llu tagged as %llu.\n",
                 (yyvsp[-2]).value, (yyvsp[0]).value, unique);
                 (yyval).value = unique++;
           }
-#line 1276 "grammar.tab.c" /* yacc.c:1646  */
+#line 1310 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 63 "grammar.y" /* yacc.c:1646  */
+#line 67 "grammar.y" /* yacc.c:1646  */
     {
-                printf("Logical if-only-if.\n");
+                printf("Logical if-only-if between %llu and %llu tagged as %llu.\n",
+                (yyvsp[-2]).value, (yyvsp[0]).value, unique);
+                (yyval).value = unique++;
           }
-#line 1284 "grammar.tab.c" /* yacc.c:1646  */
+#line 1320 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 70 "grammar.y" /* yacc.c:1646  */
+#line 76 "grammar.y" /* yacc.c:1646  */
     {
-               printf("Logical NOT.\n");
+               printf("Logical NOT of %llu tagged as %llu.\n", (yyvsp[0]).value,
+               unique);
+               (yyval).value = unique++;
           }
-#line 1292 "grammar.tab.c" /* yacc.c:1646  */
+#line 1330 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 74 "grammar.y" /* yacc.c:1646  */
-    {
-               printf("CTL all finally.\n");
-          }
-#line 1300 "grammar.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 14:
-#line 78 "grammar.y" /* yacc.c:1646  */
-    {
-               printf("CTL exists finally.\n");
-          }
-#line 1308 "grammar.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 15:
 #line 82 "grammar.y" /* yacc.c:1646  */
     {
-               printf("CTL all globally.\n");
-          }
-#line 1316 "grammar.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 16:
-#line 86 "grammar.y" /* yacc.c:1646  */
-    {
-               printf("CTL exists globally.\n");
-          }
-#line 1324 "grammar.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 17:
-#line 90 "grammar.y" /* yacc.c:1646  */
-    {
-               printf("CTL all next.\n");
-          }
-#line 1332 "grammar.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 18:
-#line 94 "grammar.y" /* yacc.c:1646  */
-    {
-               printf("CTL exists next.\n");
+               printf("CTL all finally of %llu tagged as %llu.\n", (yyvsp[0]).value,
+               unique);
+               (yyval).value = unique++;
           }
 #line 1340 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
-  case 19:
-#line 98 "grammar.y" /* yacc.c:1646  */
+  case 14:
+#line 88 "grammar.y" /* yacc.c:1646  */
     {
-               printf("CTL all until.\n");
+               printf("CTL exists finally of %llu tagged as %llu.\n", (yyvsp[0]).value,
+               unique);
+               (yyval).value = unique++;
           }
-#line 1348 "grammar.tab.c" /* yacc.c:1646  */
+#line 1350 "grammar.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 15:
+#line 94 "grammar.y" /* yacc.c:1646  */
+    {
+               printf("CTL all globally of %llu tagged as %llu.\n", (yyvsp[0]).value,
+               unique);
+               (yyval).value = unique++;
+          }
+#line 1360 "grammar.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 16:
+#line 100 "grammar.y" /* yacc.c:1646  */
+    {
+               printf("CTL exists globally of %llu tagged as %llu.\n", (yyvsp[0]).value,
+               unique);
+               (yyval).value = unique++;
+          }
+#line 1370 "grammar.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 17:
+#line 106 "grammar.y" /* yacc.c:1646  */
+    {
+               printf("CTL all next of %llu tagged as %llu.\n", (yyvsp[0]).value,
+               unique);
+               (yyval).value = unique++;
+          }
+#line 1380 "grammar.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 18:
+#line 112 "grammar.y" /* yacc.c:1646  */
+    {
+               printf("CTL exists next of %llu tagged as %llu.\n", (yyvsp[0]).value,
+               unique);
+               (yyval).value = unique++;
+          }
+#line 1390 "grammar.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 19:
+#line 118 "grammar.y" /* yacc.c:1646  */
+    {
+               printf("CTL all of %llu until %llu tagged as %llu.\n", (yyvsp[-1]).value,
+               (yyvsp[0]).value, unique);
+               (yyval).value = unique++;
+          }
+#line 1400 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 102 "grammar.y" /* yacc.c:1646  */
+#line 124 "grammar.y" /* yacc.c:1646  */
     {
-               printf("CTL exists until.\n");
+               printf("CTL all of %llu until %llu tagged as %llu.\n", (yyvsp[-3]).value,
+               (yyvsp[-1]).value, unique);
+               (yyval).value = unique++;
           }
-#line 1356 "grammar.tab.c" /* yacc.c:1646  */
+#line 1410 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 108 "grammar.y" /* yacc.c:1646  */
+#line 130 "grammar.y" /* yacc.c:1646  */
+    {
+               printf("CTL exists %llu until %llu tagged as %llu.\n", (yyvsp[-1]).value,
+               (yyvsp[0]).value, unique);
+               (yyval).value = unique++;
+          }
+#line 1420 "grammar.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 22:
+#line 136 "grammar.y" /* yacc.c:1646  */
+    {
+               printf("CTL exists %llu until %llu tagged as %llu.\n", (yyvsp[-3]).value,
+               (yyvsp[-1]).value, unique);
+               (yyval).value = unique++;
+          }
+#line 1430 "grammar.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 23:
+#line 144 "grammar.y" /* yacc.c:1646  */
     {
                 printf("Identifier %s tagged as %llu.\n", (yyvsp[0]).name, unique);
                 (yyval).value = unique++;
             }
-#line 1365 "grammar.tab.c" /* yacc.c:1646  */
+#line 1439 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
-  case 22:
-#line 113 "grammar.y" /* yacc.c:1646  */
+  case 24:
+#line 149 "grammar.y" /* yacc.c:1646  */
     {
-                printf("Parenthesized expr.\n");
+                printf("Parenthesized expr of tag %llu.\n", (yyvsp[-1]).value);
+                (yyval).value = (yyvsp[-1]).value;
             }
-#line 1373 "grammar.tab.c" /* yacc.c:1646  */
+#line 1448 "grammar.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1377 "grammar.tab.c" /* yacc.c:1646  */
+#line 1452 "grammar.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1601,7 +1676,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 117 "grammar.y" /* yacc.c:1906  */
+#line 154 "grammar.y" /* yacc.c:1906  */
 
 
 /* Exchange type: 4. exchange variable is finally defined */
@@ -1610,7 +1685,6 @@ char *pgname;  // global: program name
 
 int main(int argc, char *argv[])
 {
-        printf("Something happens in main...\n");
         pgname = argv[0];
         yyparse();
 }

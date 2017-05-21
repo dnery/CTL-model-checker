@@ -18,7 +18,7 @@ size_t unique;
 /* Precedence increases downwards */
 
 /* 1. */
-%token EOL
+%token IDENTIFIER OPAR CPAR COMMA EOL
 
 /* 2. */
 %left LOGICAL_OR LOGICAL_AND LOGICAL_IMP LOGICAL_IFF
@@ -28,9 +28,6 @@ size_t unique;
 
 /* 4. */
 %right CTL_AF CTL_EF CTL_AG CTL_EG CTL_AX CTL_EX CTL_AU CTL_EU
-
-/* 5. */
-%token IDENTIFIER OPAR CPAR
 
 %%
 list: /* literally nothing */
@@ -42,16 +39,23 @@ list: /* literally nothing */
     ;
 
 expr: logical_expr
+    {
+        $$.value = $1.value;
+    }
     ;
 
 logical_expr: unary_expr
           | logical_expr LOGICAL_OR unary_expr
           {
-                printf("Logical OR.\n");
+                printf("Logical OR between %llu and %llu tagged as %llu.\n",
+                $1.value, $3.value, unique);
+                $$.value = unique++;
           }
           | logical_expr LOGICAL_AND unary_expr
           {
-                printf("Logical AND.\n");
+                printf("Logical AND between %llu and %llu tagged as %llu.\n",
+                $1.value, $3.value, unique);
+                $$.value = unique++;
           }
           | logical_expr LOGICAL_IMP unary_expr
           {
@@ -61,46 +65,78 @@ logical_expr: unary_expr
           }
           | logical_expr LOGICAL_IFF unary_expr
           {
-                printf("Logical if-only-if.\n");
+                printf("Logical if-only-if between %llu and %llu tagged as %llu.\n",
+                $1.value, $3.value, unique);
+                $$.value = unique++;
           }
           ;
 
 unary_expr: primary_expr
           | LOGICAL_NOT unary_expr
           {
-               printf("Logical NOT.\n");
+               printf("Logical NOT of %llu tagged as %llu.\n", $2.value,
+               unique);
+               $$.value = unique++;
           }
           | CTL_AF unary_expr
           {
-               printf("CTL all finally.\n");
+               printf("CTL all finally of %llu tagged as %llu.\n", $2.value,
+               unique);
+               $$.value = unique++;
           }
           | CTL_EF unary_expr
           {
-               printf("CTL exists finally.\n");
+               printf("CTL exists finally of %llu tagged as %llu.\n", $2.value,
+               unique);
+               $$.value = unique++;
           }
           | CTL_AG unary_expr
           {
-               printf("CTL all globally.\n");
+               printf("CTL all globally of %llu tagged as %llu.\n", $2.value,
+               unique);
+               $$.value = unique++;
           }
           | CTL_EG unary_expr
           {
-               printf("CTL exists globally.\n");
+               printf("CTL exists globally of %llu tagged as %llu.\n", $2.value,
+               unique);
+               $$.value = unique++;
           }
           | CTL_AX unary_expr
           {
-               printf("CTL all next.\n");
+               printf("CTL all next of %llu tagged as %llu.\n", $2.value,
+               unique);
+               $$.value = unique++;
           }
           | CTL_EX unary_expr
           {
-               printf("CTL exists next.\n");
+               printf("CTL exists next of %llu tagged as %llu.\n", $2.value,
+               unique);
+               $$.value = unique++;
           }
-          | CTL_AU unary_expr
+          | CTL_AU unary_expr unary_expr
           {
-               printf("CTL all until.\n");
+               printf("CTL all of %llu until %llu tagged as %llu.\n", $2.value,
+               $3.value, unique);
+               $$.value = unique++;
           }
-          | CTL_EU unary_expr
+          | CTL_AU OPAR expr COMMA expr CPAR
           {
-               printf("CTL exists until.\n");
+               printf("CTL all of %llu until %llu tagged as %llu.\n", $3.value,
+               $5.value, unique);
+               $$.value = unique++;
+          }
+          | CTL_EU unary_expr unary_expr
+          {
+               printf("CTL exists %llu until %llu tagged as %llu.\n", $2.value,
+               $3.value, unique);
+               $$.value = unique++;
+          }
+          | CTL_EU OPAR expr COMMA expr CPAR
+          {
+               printf("CTL exists %llu until %llu tagged as %llu.\n", $3.value,
+               $5.value, unique);
+               $$.value = unique++;
           }
           ;
 
@@ -111,7 +147,8 @@ primary_expr: IDENTIFIER
             }
             | OPAR expr CPAR
             {
-                printf("Parenthesized expr.\n");
+                printf("Parenthesized expr of tag %llu.\n", $2.value);
+                $$.value = $2.value;
             }
             ;
 %%
@@ -122,7 +159,6 @@ char *pgname;  // global: program name
 
 int main(int argc, char *argv[])
 {
-        printf("Something happens in main...\n");
         pgname = argv[0];
         yyparse();
 }

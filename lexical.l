@@ -21,7 +21,6 @@ extern lval_t yylval;
 "&"                     return LOGICAL_AND;
 "->"                    return LOGICAL_IMP;
 "<->"                   return LOGICAL_IFF;
-
 "AF"                    return CTL_AF;          /* CTL command tokens */
 "EF"                    return CTL_EF;
 "AG"                    return CTL_AG;
@@ -30,12 +29,11 @@ extern lval_t yylval;
 "EX"                    return CTL_EX;
 "AU"                    return CTL_AU;
 "EU"                    return CTL_EU;
-
 [a-zA-Z][a-zA-Z0-9]*    { yylval.name = yytext;
                           return IDENTIFIER; }  /* Store identifier name */
-
+","                     return COMMA;
 "("                     return OPAR;
 ")"                     return CPAR;
-\n                      return EOL;
+"\n"                    return EOL;
 [ \t]+                  ;                       /* Ignore any whitespace */
 %%
