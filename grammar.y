@@ -15,13 +15,13 @@ typedef union LVAL_T {
 size_t uniq_tag = 1;
 
 size_t exproc_id(lval_t);
-
-size_t exproc_or(lval_t);
-size_t exproc_and(lval_t);
-size_t exproc_imp(lval_t);
-size_t exproc_iff(lval_t);
+size_t exproc_or(lval_t, lval_t);
+size_t exproc_and(lval_t, lval_t);
+size_t exproc_imp(lval_t, lval_t);
+size_t exproc_iff(lval_t, lval_t);
 size_t exproc_not(lval_t);
 
+void cleanup();
 %}
 
 /* Precedence increases downwards */
@@ -42,6 +42,9 @@ size_t exproc_not(lval_t);
 list: /* literally nothing */
     | list EOL
     | list expr EOL
+    {
+        cleanup();
+    }
     ;
 
 expr: logical_expr
@@ -53,27 +56,27 @@ expr: logical_expr
 logical_expr: unary_expr
           | logical_expr LOGICAL_OR unary_expr
           {
+                $$.value = exproc_or($1, $3);
                 printf("Logical OR between %llu and %llu tagged as %llu.\n",
-                $1.value, $3.value, uniq_tag);
-                $$.value = uniq_tag++;
+                $1.value, $3.value, $$.value);
           }
           | logical_expr LOGICAL_AND unary_expr
           {
+                $$.value = exproc_and($1, $3);
                 printf("Logical AND between %llu and %llu tagged as %llu.\n",
-                $1.value, $3.value, uniq_tag);
-                $$.value = uniq_tag++;
+                $1.value, $3.value, $$.value);
           }
           | logical_expr LOGICAL_IMP unary_expr
           {
+                $$.value = exproc_imp($1, $3);
                 printf("Logical implication between %llu and %llu tagged as %llu.\n",
-                $1.value, $3.value, uniq_tag);
-                $$.value = uniq_tag++;
+                $1.value, $3.value, $$.value);
           }
           | logical_expr LOGICAL_IFF unary_expr
           {
+                $$.value = exproc_iff($1, $3);
                 printf("Logical if-only-if between %llu and %llu tagged as %llu.\n",
-                $1.value, $3.value, uniq_tag);
-                $$.value = uniq_tag++;
+                $1.value, $3.value, $$.value);
           }
           ;
 
@@ -185,15 +188,82 @@ size_t exproc_id(lval_t lval)
 {
         uniq_tag <<= 1;
 
-        printf("  Where's %s.\n", lval.name);
+        //printf("  Where's %s.\n", lval.name);
 
         for (size_t inode = 0; inode < am_dims; inode++)
                 for (size_t iprop = 0; iprop < am_nodes[inode].nprops; iprop++)
                         if (!strcmp(am_nodes[inode].props[iprop], lval.name)) {
                                 am_nodes[inode].uniq_tags |= uniq_tag;
-                                printf("    Tagged %llu.\n", inode+1);
+                                //printf("    Tagged %llu.\n", inode+1);
                                 break;
                         }
+
+        return uniq_tag;
+}
+
+size_t exproc_or(lval_t lva, lval_t lvb)
+{
+        uniq_tag <<= 1;
+
+        //printf("  Where's %llu OR %llu.\n", lva.value, lvb.value);
+
+        for (size_t inode = 0; inode < am_dims; inode++)
+                if((am_nodes[inode].uniq_tags & lva.value) ||
+                   (am_nodes[inode].uniq_tags & lvb.value)) {
+                        am_nodes[inode].uniq_tags |= uniq_tag;
+                        //printf("    Tagged %llu.\n", inode+1);
+                }
+
+        return uniq_tag;
+}
+
+size_t exproc_and(lval_t lva, lval_t lvb)
+{
+        uniq_tag <<= 1;
+
+        //printf("  Where's %llu AND %llu.\n", lva.value, lvb.value);
+
+        for (size_t inode = 0; inode < am_dims; inode++)
+                if((am_nodes[inode].uniq_tags & lva.value) &&
+                   (am_nodes[inode].uniq_tags & lvb.value)) {
+                        am_nodes[inode].uniq_tags |= uniq_tag;
+                        //printf("    Tagged %llu.\n", inode+1);
+                }
+
+        return uniq_tag;
+}
+
+size_t exproc_imp(lval_t lva, lval_t lvb)
+{
+        uniq_tag <<= 1;
+
+        //printf("  Where's %llu -> %llu.\n", lva.value, lvb.value);
+
+        for (size_t inode = 0; inode < am_dims; inode++)
+                if(!(am_nodes[inode].uniq_tags & lva.value) ||
+                   (am_nodes[inode].uniq_tags & lvb.value)) {
+                        am_nodes[inode].uniq_tags |= uniq_tag;
+                        //printf("    Tagged %llu.\n", inode+1);
+                }
+
+        return uniq_tag;
+}
+
+size_t exproc_iff(lval_t lva, lval_t lvb)
+{
+        size_t decomp_a = exproc_imp(lva, lvb);
+        size_t decomp_b = exproc_imp(lvb, lva);
+
+        uniq_tag <<= 1;
+
+        //printf("  Where's %llu <-> %llu.\n", lva.value, lvb.value);
+
+        for (size_t inode = 0; inode < am_dims; inode++)
+                if((am_nodes[inode].uniq_tags & decomp_a) &&
+                   (am_nodes[inode].uniq_tags & decomp_b)) {
+                        am_nodes[inode].uniq_tags |= uniq_tag;
+                        //printf("    Tagged %llu.\n", inode+1);
+                }
 
         return uniq_tag;
 }
@@ -202,15 +272,44 @@ size_t exproc_not(lval_t lval)
 {
         uniq_tag <<= 1;
 
-        printf("  Where's not %llu.\n", lval.value);
+        //printf("  Where's not %llu.\n", lval.value);
 
         for (size_t inode = 0; inode < am_dims; inode++)
                 if(!(am_nodes[inode].uniq_tags & lval.value)) {
                         am_nodes[inode].uniq_tags |= uniq_tag;
-                        printf("    Tagged %llu.\n", inode+1);
+                        //printf("    Tagged %llu.\n", inode+1);
                 }
 
         return uniq_tag;
+}
+
+void print_node_info()
+{
+        printf("\nPrinting: graph node info\n\n");
+
+        // Print: adj-matrix nodes
+        for (size_t inode = 0; inode < am_dims; inode++) {
+                printf("Node %d:", inode+1);
+
+                printf("\n  Has neighbours: ");
+                for (size_t inext = 0; inext < am_dims; inext++)
+                        if (am_graph[inode*am_dims+inext])
+                                printf("%llu ", inext+1);
+
+                printf("\n  Has properties: ");
+                for (size_t iprop = 0; iprop < am_nodes[inode].nprops; iprop++)
+                        printf("%s ", am_nodes[inode].props[iprop]);
+
+                printf("\n  Tagged with: ");
+                size_t all_tags = uniq_tag;
+                while (all_tags > 1) {
+                        if (all_tags & am_nodes[inode].uniq_tags)
+                                printf("%llu ", all_tags);
+                        all_tags >>= 1;
+                }
+
+                printf("\n");
+        }
 }
 
 int main(int argc, char *argv[])
@@ -268,12 +367,6 @@ int main(int argc, char *argv[])
                 }
         }
 
-        printf("Begin CTL expression parsing...\n\n");
-
-        yyparse();
-
-        printf("\nParsing successful. Doing other stuff...\n\n");
-
         /*
          * Print graph
          */
@@ -286,36 +379,16 @@ int main(int argc, char *argv[])
                 printf("\n");
         }
 
-        printf("\nPrinting: graph node info\n\n");
+        printf("\nBegin CTL expression parsing...\n\n");
 
-        // Print: adj-matrix nodes
-        for (size_t inode = 0; inode < am_dims; inode++) {
-                printf("Node %d:", inode+1);
+        yyparse();
 
-                printf("\n  Has neighbours: ");
-                for (size_t inext = 0; inext < am_dims; inext++)
-                        if (am_graph[inode*am_dims+inext])
-                                printf("%llu ", inext+1);
-
-                printf("\n  Has properties: ");
-                for (size_t iprop = 0; iprop < am_nodes[inode].nprops; iprop++)
-                        printf("%s ", am_nodes[inode].props[iprop]);
-
-                printf("\n  Has been tagged with: ");
-                size_t all_tags = uniq_tag;
-                while (all_tags > 1) {
-                        if (all_tags & am_nodes[inode].uniq_tags)
-                                printf("%llu ", all_tags);
-                        all_tags >>= 1;
-                }
-
-                printf("\n");
-        }
+        printf("\nParsing successful. Doing other stuff...\n\n");
 
         /*
          * Free graph
          */
-        printf("\nDeallocating graph...\n\n");
+        printf("Deallocating graph...\n\n");
 
         // Free: node props
         for (size_t inode = 0; inode < am_dims; inode++) {
@@ -344,4 +417,15 @@ int yyerror(char *err)
 int yywrap()
 {
         return 1;
+}
+
+/* High-level expression cleanup */
+void cleanup()
+{
+        print_node_info();  // show me the goods before you leave
+
+        for (size_t inode = 0; inode < am_dims; inode++)
+                am_nodes[inode].uniq_tags = 1;
+
+        uniq_tag = 1;
 }
