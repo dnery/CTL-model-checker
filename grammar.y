@@ -11,8 +11,17 @@ typedef union LVAL_T {
 
 #define YYSTYPE lval_t
 
-/* unique numerical id for the processing step */
-size_t unique;
+/* uniq_tag numerical id for the processing step */
+size_t uniq_tag = 1;
+
+size_t exproc_id(lval_t);
+
+size_t exproc_or(lval_t);
+size_t exproc_and(lval_t);
+size_t exproc_imp(lval_t);
+size_t exproc_iff(lval_t);
+size_t exproc_not(lval_t);
+
 %}
 
 /* Precedence increases downwards */
@@ -33,9 +42,6 @@ size_t unique;
 list: /* literally nothing */
     | list EOL
     | list expr EOL
-    {
-        unique = 0;
-    }
     ;
 
 expr: logical_expr
@@ -48,102 +54,101 @@ logical_expr: unary_expr
           | logical_expr LOGICAL_OR unary_expr
           {
                 printf("Logical OR between %llu and %llu tagged as %llu.\n",
-                $1.value, $3.value, unique);
-                $$.value = unique++;
+                $1.value, $3.value, uniq_tag);
+                $$.value = uniq_tag++;
           }
           | logical_expr LOGICAL_AND unary_expr
           {
                 printf("Logical AND between %llu and %llu tagged as %llu.\n",
-                $1.value, $3.value, unique);
-                $$.value = unique++;
+                $1.value, $3.value, uniq_tag);
+                $$.value = uniq_tag++;
           }
           | logical_expr LOGICAL_IMP unary_expr
           {
                 printf("Logical implication between %llu and %llu tagged as %llu.\n",
-                $1.value, $3.value, unique);
-                $$.value = unique++;
+                $1.value, $3.value, uniq_tag);
+                $$.value = uniq_tag++;
           }
           | logical_expr LOGICAL_IFF unary_expr
           {
                 printf("Logical if-only-if between %llu and %llu tagged as %llu.\n",
-                $1.value, $3.value, unique);
-                $$.value = unique++;
+                $1.value, $3.value, uniq_tag);
+                $$.value = uniq_tag++;
           }
           ;
 
 unary_expr: primary_expr
           | LOGICAL_NOT unary_expr
           {
-               printf("Logical NOT of %llu tagged as %llu.\n", $2.value,
-               unique);
-               $$.value = unique++;
+               $$.value = exproc_not($2);
+               printf("Logical NOT of %llu tagged as %llu.\n", $2.value, $$.value);
           }
           | CTL_AF unary_expr
           {
                printf("CTL all finally of %llu tagged as %llu.\n", $2.value,
-               unique);
-               $$.value = unique++;
+               uniq_tag);
+               $$.value = uniq_tag++;
           }
           | CTL_EF unary_expr
           {
                printf("CTL exists finally of %llu tagged as %llu.\n", $2.value,
-               unique);
-               $$.value = unique++;
+               uniq_tag);
+               $$.value = uniq_tag++;
           }
           | CTL_AG unary_expr
           {
                printf("CTL all globally of %llu tagged as %llu.\n", $2.value,
-               unique);
-               $$.value = unique++;
+               uniq_tag);
+               $$.value = uniq_tag++;
           }
           | CTL_EG unary_expr
           {
                printf("CTL exists globally of %llu tagged as %llu.\n", $2.value,
-               unique);
-               $$.value = unique++;
+               uniq_tag);
+               $$.value = uniq_tag++;
           }
           | CTL_AX unary_expr
           {
                printf("CTL all next of %llu tagged as %llu.\n", $2.value,
-               unique);
-               $$.value = unique++;
+               uniq_tag);
+               $$.value = uniq_tag++;
           }
           | CTL_EX unary_expr
           {
                printf("CTL exists next of %llu tagged as %llu.\n", $2.value,
-               unique);
-               $$.value = unique++;
+               uniq_tag);
+               $$.value = uniq_tag++;
           }
           | CTL_AU unary_expr unary_expr
           {
                printf("CTL all of %llu until %llu tagged as %llu.\n", $2.value,
-               $3.value, unique);
-               $$.value = unique++;
+               $3.value, uniq_tag);
+               $$.value = uniq_tag++;
           }
           | CTL_AU OPAR expr COMMA expr CPAR
           {
                printf("CTL all of %llu until %llu tagged as %llu.\n", $3.value,
-               $5.value, unique);
-               $$.value = unique++;
+               $5.value, uniq_tag);
+               $$.value = uniq_tag++;
           }
           | CTL_EU unary_expr unary_expr
           {
                printf("CTL exists %llu until %llu tagged as %llu.\n", $2.value,
-               $3.value, unique);
-               $$.value = unique++;
+               $3.value, uniq_tag);
+               $$.value = uniq_tag++;
           }
           | CTL_EU OPAR expr COMMA expr CPAR
           {
                printf("CTL exists %llu until %llu tagged as %llu.\n", $3.value,
-               $5.value, unique);
-               $$.value = unique++;
+               $5.value, uniq_tag);
+               $$.value = uniq_tag++;
           }
           ;
 
 primary_expr: IDENTIFIER
             {
-                printf("Identifier %s tagged as %llu.\n", $1.name, unique);
-                $$.value = unique++;
+                $$.value = exproc_id($1);
+                printf("Identifier %s tagged as %llu.\n", $1.name, $$.value);
             }
             | OPAR expr CPAR
             {
@@ -161,10 +166,12 @@ primary_expr: IDENTIFIER
 /* Node type for graph holds properties as strings */
 typedef struct NODE_T {
 
-        size_t nprops;  // number of props
-        char **props;   // props as strings
+        size_t uniq_tags;  // unique expression tags
+        size_t nprops;     // number of props
+        char **props;      // props as strings
 
 } node_t;
+
 char   *am_graph;  // global: adj-matrix graph (as a vector)
 node_t *am_nodes;  // global: adj-matrix graph nodes
 size_t  am_dims;   // golbal: adj-matrix dimensions
@@ -174,6 +181,37 @@ size_t  am_dims;   // golbal: adj-matrix dimensions
 lval_t yylval;  // global: lexer retrieve
 char  *pgname;  // global: program name
 
+size_t exproc_id(lval_t lval)
+{
+        uniq_tag <<= 1;
+
+        printf("  Where's %s.\n", lval.name);
+
+        for (size_t inode = 0; inode < am_dims; inode++)
+                for (size_t iprop = 0; iprop < am_nodes[inode].nprops; iprop++)
+                        if (!strcmp(am_nodes[inode].props[iprop], lval.name)) {
+                                am_nodes[inode].uniq_tags |= uniq_tag;
+                                printf("    Tagged %llu.\n", inode+1);
+                                break;
+                        }
+
+        return uniq_tag;
+}
+
+size_t exproc_not(lval_t lval)
+{
+        uniq_tag <<= 1;
+
+        printf("  Where's not %llu.\n", lval.value);
+
+        for (size_t inode = 0; inode < am_dims; inode++)
+                if(!(am_nodes[inode].uniq_tags & lval.value)) {
+                        am_nodes[inode].uniq_tags |= uniq_tag;
+                        printf("    Tagged %llu.\n", inode+1);
+                }
+
+        return uniq_tag;
+}
 
 int main(int argc, char *argv[])
 {
@@ -182,7 +220,6 @@ int main(int argc, char *argv[])
         /*
          * Read graph
          */
-        freopen(argv[1], "r", stdin);
         printf("\nReading graph...\n\n");
 
         // Read: number of nodes in graph
@@ -207,6 +244,7 @@ int main(int argc, char *argv[])
 
                 // Read: n next props
                 scanf("%llu", &nnextprops);
+                am_nodes[currentnode-1].uniq_tags = 1;
                 am_nodes[currentnode-1].nprops = nnextprops;
                 am_nodes[currentnode-1].props = malloc(nnextprops *
                                 sizeof(*(am_nodes[currentnode-1].props)));
@@ -230,10 +268,16 @@ int main(int argc, char *argv[])
                 }
         }
 
+        printf("Begin CTL expression parsing...\n\n");
+
+        yyparse();
+
+        printf("\nParsing successful. Doing other stuff...\n\n");
+
         /*
          * Print graph
          */
-        printf("Printing: graph adj-matrix\n\n");
+        printf("\nPrinting: graph adj-matrix\n\n");
 
         // Print: adj-matrix graph
         for (size_t inode = 0; inode < am_dims; inode++) {
@@ -257,17 +301,21 @@ int main(int argc, char *argv[])
                 for (size_t iprop = 0; iprop < am_nodes[inode].nprops; iprop++)
                         printf("%s ", am_nodes[inode].props[iprop]);
 
+                printf("\n  Has been tagged with: ");
+                size_t all_tags = uniq_tag;
+                while (all_tags > 1) {
+                        if (all_tags & am_nodes[inode].uniq_tags)
+                                printf("%llu ", all_tags);
+                        all_tags >>= 1;
+                }
+
                 printf("\n");
         }
-
-        printf("\nBegin CTL expression parsing...\n\n");
-
-        yyparse();
 
         /*
          * Free graph
          */
-        printf("\nParsing successful. Deallocating graph...\n\n");
+        printf("\nDeallocating graph...\n\n");
 
         // Free: node props
         for (size_t inode = 0; inode < am_dims; inode++) {

@@ -1,2 +1,4 @@
 CMakeLists.txt
+lex.yy.c
+*.tab.*
 parser
