@@ -8,12 +8,15 @@ typedef union LVAL_T {
         char *name;
 
 } lval_t;
-
 #define YYSTYPE lval_t
 
-/* unique_tag numerical id for the processing step */
+/* Disabling all prints */
+#define printf(...)
+
+/* Unique_tag numerical id for the processing step */
 size_t unique_tag = 1;
 
+/* Logical operators */
 size_t exproc_id(lval_t);
 size_t exproc_or(lval_t, lval_t);
 size_t exproc_and(lval_t, lval_t);
@@ -21,16 +24,17 @@ size_t exproc_imp(lval_t, lval_t);
 size_t exproc_iff(lval_t, lval_t);
 size_t exproc_not(lval_t);
 
+/* CTL operators */
 size_t exproc_af(lval_t);
 size_t exproc_ef(lval_t);
 size_t exproc_ag(lval_t);
 size_t exproc_eg(lval_t);
 size_t exproc_ax(lval_t);
 size_t exproc_ex(lval_t);
-
 size_t exproc_au(lval_t, lval_t);
 size_t exproc_eu(lval_t, lval_t);
 
+/* Runs after parsing line */
 void cleanup();
 %}
 
@@ -175,16 +179,14 @@ primary_expr: IDENTIFIER
 #include <stdlib.h>
 #include <string.h>
 
-
 /* Node type for graph holds properties as strings */
 typedef struct NODE_T {
 
         size_t unique_tags;  // unique expression tags
-        size_t nprops;     // number of props
-        char **props;      // props as strings
+        size_t nprops;       // number of props
+        char **props;        // props as strings
 
 } node_t;
-
 char   *am_graph;  // global: adj-matrix graph (as a vector)
 node_t *am_nodes;  // global: adj-matrix graph nodes
 size_t  am_dims;   // golbal: adj-matrix dimensions
@@ -192,6 +194,7 @@ size_t  am_dims;   // golbal: adj-matrix dimensions
 
 /* Exchange type: 4. exchange variable is finally defined */
 lval_t yylval;  // global: lexer retrieve
+
 
 size_t exproc_id(lval_t lval)
 {
@@ -208,10 +211,8 @@ size_t exproc_id(lval_t lval)
         }
 
         // If FALSE, tag no one
-        if (!strcmp(lval.name, "FALSE")) {
-                unique_tag >>= 1;
+        if (!strcmp(lval.name, "FALSE"))
                 return 0;
-        }
 
         // Otherwise, as usual
         for (size_t inode = 0; inode < am_dims; inode++) {
@@ -279,10 +280,10 @@ size_t exproc_imp(lval_t lva, lval_t lvb)
 
 size_t exproc_iff(lval_t lva, lval_t lvb)
 {
+        unique_tag <<= 1;
+
         size_t decomp_a = exproc_imp(lva, lvb);
         size_t decomp_b = exproc_imp(lvb, lva);
-
-        unique_tag <<= 1;
 
         printf("  Where's %lu <-> %lu.\n", lva.value, lvb.value);
 
@@ -311,7 +312,6 @@ size_t exproc_not(lval_t lval)
         return unique_tag;
 }
 
-// TODO debug this
 char _exproc_af_dfs(size_t inode, size_t target, char *visited)
 {
         visited[inode] = 1;
@@ -355,30 +355,29 @@ char _exproc_af_dfs(size_t inode, size_t target, char *visited)
         return has_valid_paths;
 }
 
-// TODO it's correct... correct?
 size_t exproc_af(lval_t lval)
 {
-        size_t local_tag = 0;
+        unique_tag <<= 1;
 
         printf("  Where's AF(%lu).\n", lval.value);
 
         // Array of visits for the DF search
-        char *visited = calloc(am_dims, 1);
+        char *visited = malloc(am_dims);
 
-        // Generate unique tag only if expr is true
-        if (_exproc_af_dfs(0, lval.value, visited)) {
-                unique_tag <<= 1;
-                local_tag = unique_tag;
+        // Generate unique tag and tag node if expr is true
+        for (size_t inode = 0; inode < am_dims; inode++) {
+                memset(visited, 0, am_dims);
+
+                printf("   For node %lu.\n", inode+1);
+                if (_exproc_af_dfs(inode, lval.value, visited)) {
+                        am_nodes[inode].unique_tags |= unique_tag;
+                }
         }
 
         free(visited);
 
-        // Tag all the nodes unconditionally
-        for (size_t inode = 0; inode < am_dims; inode++)
-                am_nodes[inode].unique_tags |= local_tag;
-
         // The return key is either unique or always False
-        return local_tag;
+        return unique_tag;
 }
 
 size_t exproc_ef(lval_t lval)
@@ -395,65 +394,27 @@ size_t exproc_ef(lval_t lval)
         return expr_builder.value;
 }
 
-// TODO it's correct... correct?
 size_t exproc_ag(lval_t lval)
 {
         unique_tag <<= 1;
-        size_t local_tag = unique_tag;
 
         printf("  Where's AG(%lu).\n    Is %lu everywhere? ", lval.value, lval.value);
 
         // AG or all-across-all-paths means every node, basically
         for (size_t inode = 0; inode < am_dims; inode++) {
                 if (!(am_nodes[inode].unique_tags & lval.value)) {
-                        unique_tag >>= 1;
-                        local_tag = 0;
-                        break;
+                        printf("No.\n");
+                        return 0;
                 }
         }
-
-        printf("%s.\n", (local_tag ? "Yes" : "No"));
+        printf("Yes.\n");
 
         // Tag all the nodes unconditionally
         for (size_t inode = 0; inode < am_dims; inode++)
-                am_nodes[inode].unique_tags |= local_tag;
+                am_nodes[inode].unique_tags |= unique_tag;
 
         // The return key is either unique or always False
-        return local_tag;
-}
-
-// TODO can this be defined inside exproc_eg?
-// TODO DO NOT TOUCH THIS PLEASE. IT'S COMPLICATED.
-char _exproc_eg_dfs(size_t inode, size_t value, char *visited)
-{
-        visited[inode] = 1;
-
-        // If condition is not satisfacted, return immediately
-        if (!(am_nodes[inode].unique_tags & value))
-                return 0;
-
-        // If there's neighbours, then at least one must succeed
-        char has_invalid_paths = 0;
-        for (size_t inext = 0; inext < am_dims; inext++) {
-
-                if (am_graph[inode*am_dims+inext]) {                                    // if it's a neighbour (including self)...
-
-                        if (visited[inext] && (am_nodes[inext].unique_tags & value)) {  // if it's visited and has the property, it's a loop...
-                                printf("    EG stack: success for %lu. Returning.\n", inode+1);
-                                return 1;
-                        }
-                        if (!visited[inext] && _exproc_eg_dfs(inext, value, visited)) { // if it's unvisited and the recursive call succeeds...
-                                printf("    EG stack: success for %lu. Returning.\n", inode+1);
-                                return 1;
-                        }
-                        has_invalid_paths = 1;                                          // if theres neighbours, but all turn out invalid, no success...
-                }
-        }
-
-        if (!has_invalid_paths) printf("    EG stack: success on shallow check for %lu.\n", inode+1);
-
-        // If neighbours were found but all fail, then fail self as well
-        return !has_invalid_paths;
+        return unique_tag;
 }
 
 size_t exproc_eg(lval_t lval)
@@ -470,33 +431,33 @@ size_t exproc_eg(lval_t lval)
         return expr_builder.value;
 }
 
-// TODO it's correct... correct?
 size_t exproc_ax(lval_t lval)
 {
         unique_tag <<= 1;
-        size_t local_tag = unique_tag;
 
-        printf("  Where's AX(%lu).\n    All neighbours have %lu? ", lval.value, lval.value);
+        printf("  Where's AX(%lu).", lval.value);
 
         // Fail if any of the neighbours doesn't have the target
-        for (size_t inode = 1; inode < am_dims; inode++) {
+        for (size_t inode = 0; inode < am_dims; inode++) {
 
-                if (am_graph[inode] && !(am_nodes[inode].unique_tags & lval.value)) {
-                        printf("No, %lu doesn't.\n", inode+1);
-                        unique_tag >>= 1;
-                        local_tag = 0;
-                        break;
-                   }
+                printf("\n    Assume neigh's of %lu have %lu. ", inode+1, lval.value);
+                am_nodes[inode].unique_tags |= unique_tag;
+
+                for (size_t inext = 0; inext < am_dims; inext++) {
+
+                        if (inode != inext &&                               // If not self...
+                            am_graph[inext] &&                              // If is neighbour...
+                            !(am_nodes[inext].unique_tags & lval.value)) {  // If condition doesn't hold...
+
+                                printf("No, node %lu doesn't.\n", inext+1);
+                                am_nodes[inode].unique_tags ^= unique_tag;
+                                break;
+                        }
+                }
         }
 
-        if (local_tag) printf("Yes.\n");
-
-        // Tag all the nodes unconditionally
-        for (size_t inode = 0; inode < am_dims; inode++)
-                am_nodes[inode].unique_tags |= local_tag;
-
         // The return key is either unique or always False
-        return local_tag;
+        return unique_tag;
 }
 
 size_t exproc_ex(lval_t lval)
@@ -538,7 +499,6 @@ size_t exproc_au(lval_t lva, lval_t lvb)
         return expr_builder1.value;
 }
 
-// TODO debug this
 char _exproc_eu_dfs(size_t inode, size_t source, size_t target, char *visited)
 {
         visited[inode] = 1;
@@ -574,49 +534,58 @@ char _exproc_eu_dfs(size_t inode, size_t source, size_t target, char *visited)
 
 size_t exproc_eu(lval_t lva, lval_t lvb)
 {
-        size_t local_tag = 0;
+        unique_tag <<= 1;
 
         printf("  Where's EU(%lu,%lu).\n", lva.value, lvb.value);
 
         // Array of visits for the DF search
-        char *visited = calloc(am_dims, 1);
+        char *visited = malloc(am_dims);
 
         // Generate unique tag only if expr is true
-        if (_exproc_eu_dfs(0, lva.value, lvb.value, visited)) {
-                unique_tag <<= 1;
-                local_tag = unique_tag;
+        for (size_t inode = 0; inode < am_dims; inode++) {
+                memset(visited, 0, am_dims);
+
+                printf("   For node %lu", inode+1);
+                if (_exproc_eu_dfs(inode, lva.value, lvb.value, visited)) {
+                        am_nodes[inode].unique_tags |= unique_tag;
+                }
         }
 
         free(visited);
 
-        // Tag all the nodes unconditionally
-        for (size_t inode = 0; inode < am_dims; inode++)
-                am_nodes[inode].unique_tags |= local_tag;
-
         // The return key is either unique or always False
-        return local_tag;
+        return unique_tag;
 }
+
+
+/* Disabling all prints */
+#undef printf
+
 
 void print_node_info()
 {
-        printf("\nPrinting: graph node info\n\n");
+        printf("\nGraph node information\n");
+        printf("======================\n\n");
+
+        printf("  Final expression tag is %lu.\n", unique_tag);
+        printf("  The expr is true for nodes tagged with this value.\n\n");
 
         // Print: adj-matrix nodes
         for (size_t inode = 0; inode < am_dims; inode++) {
-                printf("Node %lu:", inode+1);
+                printf("  Node %lu:", inode+1);
 
-                printf("\n  Has neighbours: ");
+                printf("\n    Has neighbours: ");
                 for (size_t inext = 0; inext < am_dims; inext++)
                         if (am_graph[inode*am_dims+inext])
                                 printf("%lu ", inext+1);
 
-                printf("\n  Has properties: ");
+                printf("\n    Has properties: ");
                 for (size_t iprop = 0; iprop < am_nodes[inode].nprops; iprop++)
                         printf("%s ", am_nodes[inode].props[iprop]);
 
                 size_t all_tags = unique_tag;
 
-                printf("\n  Tagged with: ");
+                printf("\n    Tagged with: ");
                 while (all_tags > 1) {
                         if (all_tags & am_nodes[inode].unique_tags)
                                 printf("%lu ", all_tags);
@@ -625,18 +594,15 @@ void print_node_info()
                 printf("\n\n");
         }
 
+        printf("\nEvaluation result\n");
+        printf("=================\n\n");
+
         // Print: evaluation result
-        if ((unique_tag > 1) &&
-            (am_nodes[0].unique_tags > 1) &&
-            (unique_tag & am_nodes[0].unique_tags)) {
-                printf("======\n");
-                printf(" TRUE \n");
-                printf("======\n\n");
-        } else {
-                printf("=======\n");
-                printf(" FALSE \n");
-                printf("=======\n\n");
+        for (size_t inode = 0; inode < am_dims; inode++) {
+                printf("  For node %lu expr is %s.\n", inode+1,
+                (unique_tag & am_nodes[inode].unique_tags) ? "True" : "False");
         }
+        printf("\n\n\n");
 }
 
 int main(int argc, char *argv[])
@@ -646,7 +612,8 @@ int main(int argc, char *argv[])
         /*
          * Read graph
          */
-        printf("\nReading graph...\n\n");
+        printf("\nReading graph...\n");
+        printf("================\n\n");
 
         // Read: number of nodes in graph
         scanf("%lu", &am_dims);
@@ -697,7 +664,8 @@ int main(int argc, char *argv[])
         /*
          * Print graph
          */
-        printf("\nPrinting: graph adj-matrix\n\n");
+        printf("\nGraph as adjacency matrix\n");
+        printf("=========================\n\n");
 
         // Print: adj-matrix graph
         for (size_t inode = 0; inode < am_dims; inode++) {
@@ -706,16 +674,17 @@ int main(int argc, char *argv[])
                 printf("\n");
         }
 
-        printf("\nBegin CTL expression parsing...\n\n");
+        printf("\n\nBegin CTL expression parsing...\n\n");
 
         yyparse();
 
-        printf("\nParsing successful. Doing other stuff...\n\n");
+        printf("Parsing successful. Doing other stuff...\n\n");
 
         /*
          * Free graph
          */
-        printf("Deallocating graph...\n\n");
+        printf("\nDeallocating graph\n");
+        printf("==================\n\n");
 
         // Free: node props
         for (size_t inode = 0; inode < am_dims; inode++) {

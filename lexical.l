@@ -6,7 +6,6 @@ typedef union LVAL_T {
         char *name;
 
 } lval_t;
-
 #define YYSTYPE lval_t
 
 #include "grammar.tab.h"
@@ -16,24 +15,23 @@ extern lval_t yylval;
 %}
 
 %%
-"|"                     return LOGICAL_OR;      /* Logical expression tokens */
-"!"                     return LOGICAL_NOT;
-"&"                     return LOGICAL_AND;
-"->"                    return LOGICAL_IMP;
-"<->"                   return LOGICAL_IFF;
-"AF"                    return CTL_AF;          /* CTL command tokens */
-"EF"                    return CTL_EF;
-"AG"                    return CTL_AG;
-"EG"                    return CTL_EG;
-"AX"                    return CTL_AX;
-"EX"                    return CTL_EX;
-"AU"                    return CTL_AU;
-"EU"                    return CTL_EU;
-[a-zA-Z][a-zA-Z0-9]*  { yylval.name = yytext;
-                        return IDENTIFIER; }  /* Store identifier name */
-","                     return COMMA;
-"("                     return OPAR;
-")"                     return CPAR;
-"\n"                    return EOL;
-[ \t]+                  ;                       /* Ignore any whitespace */
+"|"                   { printf("%s ", yytext); return LOGICAL_OR; }                        /* Logical expression tokens */
+"!"                   { printf("%s ", yytext); return LOGICAL_NOT; }
+"&"                   { printf("%s ", yytext); return LOGICAL_AND; }
+"->"                  { printf("%s ", yytext); return LOGICAL_IMP; }
+"<->"                 { printf("%s ", yytext); return LOGICAL_IFF; }
+"AF"                  { printf("%s ", yytext); return CTL_AF; }                            /* CTL command tokens */
+"EF"                  { printf("%s ", yytext); return CTL_EF; }
+"AG"                  { printf("%s ", yytext); return CTL_AG; }
+"EG"                  { printf("%s ", yytext); return CTL_EG; }
+"AX"                  { printf("%s ", yytext); return CTL_AX; }
+"EX"                  { printf("%s ", yytext); return CTL_EX; }
+"AU"                  { printf("%s ", yytext); return CTL_AU; }
+"EU"                  { printf("%s ", yytext); return CTL_EU; }
+[a-zA-Z][a-zA-Z0-9]*  { printf("%s ", yytext); yylval.name = yytext; return IDENTIFIER; }  /* Store identifier name */
+","                   { printf("%s ", yytext); return COMMA; }
+"("                   { printf("%s ", yytext); return OPAR; }
+")"                   { printf("%s ", yytext); return CPAR; }
+"\n"                  { printf("\n\n"); return EOL; }
+[ \t]+                { ; }                                                                /* Ignore any whitespace */
 %%
